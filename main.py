@@ -113,7 +113,7 @@ class InventoryManager:
         table_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         # Create a nested tk.Frame for the Treeview
-        tree_frame = tk.Frame(table_frame)
+        tree_frame = ttk.Frame(table_frame)
         tree_frame.pack(fill="both", expand=True)
         
         # Create Treeview with modern styling
