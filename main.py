@@ -8,7 +8,6 @@ from tkinter import messagebox
 from tkinter import ttk  # Added missing import
 
 # Configure CustomTkinter appearance
-ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("green")
 
 class InventoryManager:
