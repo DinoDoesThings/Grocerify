@@ -6,12 +6,11 @@ from datetime import datetime
 import random
 from tkinter import messagebox
 from tkinter import ttk  # Added missing import
-import tkinter as tk    # Added for some basic tkinter functionality
-sdf
+
 # Configure CustomTkinter appearance
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("green")
-
+import fpdf
 class InventoryManager:
     def __init__(self):
         # Initialize main window
