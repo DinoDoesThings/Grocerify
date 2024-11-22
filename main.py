@@ -14,12 +14,11 @@ import re
 class LoginSystem:
     def __init__(self):
         self.window = ctk.CTk()
-        self.window.title("Login System")
+        self.window.title("Grocerify Login")
         self.window.geometry("400x440")
         self.window.resizable(False, False)
         
         # Configure appearance
-        ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
         
         # Initialize database
