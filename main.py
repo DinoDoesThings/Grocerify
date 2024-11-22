@@ -6,7 +6,6 @@ from datetime import datetime
 import random
 from tkinter import messagebox
 from tkinter import ttk  # Added missing import
-import fpdf
 
 # Configure CustomTkinter appearance
 ctk.set_appearance_mode("light")
