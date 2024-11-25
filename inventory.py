@@ -10,7 +10,7 @@ import csv
 
 class InventoryManager:
     def __init__(self, username, role):
-        # Initialize main window
+        # Initialize the main window
         self.window = ctk.CTk()
         self.window.title(f"Grocerify - Welcome {username}")
         self.window.geometry("1000x800")
@@ -63,7 +63,7 @@ class InventoryManager:
             entry.grid(row=i, column=1, padx=10, pady=5, sticky="w")
             self.entries.append(entry)
             
-            if i == 0:  # Add Generate ID button next to Item ID
+            if i == 0:  # Add a "Generate ID" button next to the Item ID
                 generate_btn = ctk.CTkButton(entry_frame, 
                                            text="Generate ID",
                                            command=self.generateId,
@@ -74,7 +74,7 @@ class InventoryManager:
         button_frame = ctk.CTkFrame(self.main_container)
         button_frame.pack(fill="x", padx=20, pady=10)
 
-        #configure default color to green
+        # Changes default color to green
         ctk.set_default_color_theme("green")
         
         # Create buttons with consistent styling
@@ -226,6 +226,193 @@ class InventoryManager:
 
     def generateId(self):
         self.placeholderArray[0].set(f"ITEM-{random.randint(1000, 9999)}")
+
+    # Export item data to Excel
+    
+    def exportToExcel(self):
+        try:
+            # Get current timestamp for filename
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            default_filename = f"inventory_export_{timestamp}.csv"
+            
+            # Open file dialog for saving
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".csv",
+                initialfile=default_filename,
+                filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+                title="Export Inventory Data"
+            )
+            
+            if not file_path:  # Run if user cancels the dialog
+                return
+            
+            # Fetch all data from database with date_added
+            self.db.cursor.execute("""
+                SELECT 
+                    item_id,
+                    name,
+                    price,
+                    quantity,
+                    category,
+                    date_added
+                FROM inventory
+                ORDER BY date_added DESC
+            """)
+            rows = self.db.cursor.fetchall()
+            
+            # Write to CSV with proper formatting
+            with open(file_path, "w", newline="", encoding='utf-8') as file:
+                writer = csv.writer(file)
+                
+                # Write headers
+                writer.writerow([
+                    "Item ID",
+                    "Name",
+                    "Price",
+                    "Quantity",
+                    "Category",
+                    "Date Added"
+                ])
+                
+                # Write data rows with formatted values
+                for row in rows:
+                    item_id, name, price, quantity, category, date_added = row
+                    
+                    # Format price to 2 decimal places
+                    formatted_price = f"{float(price):.2f}"
+                    
+                    # Convert date string to datetime and format it
+                    try:
+                        date_obj = datetime.strptime(date_added, "%Y-%m-%d %H:%M:%S")
+                        formatted_date = date_obj.strftime("%Y-%m-%d %I:%M:%S %p")
+                    except ValueError:
+                        formatted_date = date_added  # Keep the original date if parsing fails
+                    
+                    writer.writerow([
+                        item_id,
+                        name,
+                        formatted_price,
+                        quantity,
+                        category,
+                        formatted_date
+                    ])
+            
+            # Get file size for the success message
+            file_size = os.path.getsize(file_path) / 1024  # Convert to KB
+            
+            messagebox.showinfo(
+                "Export Successful",
+                f"Data exported successfully!\n\n"
+                f"Location: {file_path}\n"
+                f"Items exported: {len(rows)}\n"
+                f"File size: {file_size:.1f} KB\n\n"
+            )
+            
+            # Ask if the user wants to open the exported file
+            if messagebox.askyesno("Open File", "Would you like to open the exported file?"):
+                os.startfile(file_path)
+                
+        except PermissionError:
+            messagebox.showerror(
+                "Export Error",
+                "Could not save the file. Please check if the file is open in another program."
+            )
+        except Exception as e:
+            messagebox.showerror(
+                "Export Error",
+                f"An error occurred while exporting: {str(e)}"
+            )
+
+    def run(self):
+        self.window.mainloop()
+
+class InventoryManagerUser:
+    def __init__(self, username, role):
+        # Initialize main window
+        self.window = ctk.CTk()
+        self.window.title(f"Grocerify - Welcome {username}")
+        self.window.geometry("1000x800")
+        
+        self.username = username
+        self.role = role
+        
+        # Database setup
+        self.db = Database()
+
+        # Setup GUI
+        self.setup_gui()
+
+    def setup_gui(self):
+        # Main container
+        self.main_container = ctk.CTkFrame(self.window)
+        self.main_container.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Title
+        title = ctk.CTkLabel(self.main_container, 
+                            text="Grocerify",
+                            font=ctk.CTkFont(size=24, weight="bold"))
+        title.pack(pady=10)
+        
+        # Create table frame
+        self.create_table_frame()
+
+        # Export Button
+        export_button = ctk.CTkButton(self.main_container, 
+                                      text="Export to Excel", 
+                                      command=self.exportToExcel)
+        export_button.pack(pady=10)
+
+    def create_table_frame(self):
+        # Create a frame specifically for the table
+        table_frame = ctk.CTkFrame(self.main_container)
+        table_frame.pack(fill="both", expand=True, padx=20, pady=10)
+
+        # Create a nested tk.Frame for the Treeview
+        tree_frame = ttk.Frame(table_frame)
+        tree_frame.pack(fill="both", expand=True)
+        
+        # Create Treeview with modern styling
+        self.tree = ttk.Treeview(tree_frame, show='headings', height=20)
+        self.tree["columns"] = ["Item Id", "Name", "Price", "Quantity", "Category", "Date"]
+
+        # Configure the Treeview style
+        style = ttk.Style()
+        style.configure("Treeview", rowheight=25)
+        style.configure("Treeview.Heading", font=('Arial', 10, 'bold'))
+
+        #configure default color to green
+        ctk.set_default_color_theme("green")
+        
+        # Configure columns
+        for col in self.tree["columns"]:
+            self.tree.column(col, anchor="w", width=120)
+            self.tree.heading(col, text=col, anchor="w")
+        
+        # Add scrollbars
+        y_scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
+        x_scrollbar = ttk.Scrollbar(tree_frame, orient="horizontal", command=self.tree.xview)
+        
+        # Configure the treeview to use scrollbars
+        self.tree.configure(yscrollcommand=y_scrollbar.set, xscrollcommand=x_scrollbar.set)
+        
+        # Grid layout for treeview and scrollbars
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        y_scrollbar.grid(row=0, column=1, sticky="ns")
+        x_scrollbar.grid(row=1, column=0, sticky="ew")
+        
+        # Configure grid weights
+        tree_frame.grid_rowconfigure(0, weight=1)
+        tree_frame.grid_columnconfigure(0, weight=1)
+        
+        self.refreshTable()
+
+    def refreshTable(self):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+            
+        self.db.cursor.execute("SELECT * FROM inventory")
+        for row in self.db.cursor.fetchall():
+            self.tree.insert("", "end", values=row)
 
     def exportToExcel(self):
         try:
