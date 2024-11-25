@@ -2,6 +2,9 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from database import Database
+import sqlite3
+import hashlib
+import re
 
 class LoginSystem:
     def __init__(self):
@@ -11,8 +14,7 @@ class LoginSystem:
         self.window.resizable(False, False)
         
         # Configure appearance
-        ctk.set_appearance_mode("light")
-        ctk.set_default_color_theme("blue")
+        ctk.set_default_color_theme("green")
         
         # Initialize database
         self.db = Database()
@@ -27,7 +29,7 @@ class LoginSystem:
     def setup_login_gui(self):
         # Logo or Title
         logo_label = ctk.CTkLabel(self.main_frame, 
-                                 text="Inventory Management System",
+                                 text="Welcome to Grocerify!",
                                  font=ctk.CTkFont(size=20, weight="bold"))
         logo_label.pack(pady=20)
         
@@ -63,15 +65,6 @@ class LoginSystem:
                                       fg_color="transparent",
                                       text_color=("gray10", "gray90"))
         register_button.pack(pady=10)
-        
-        # Forgot Password Link
-        forgot_button = ctk.CTkButton(login_frame,
-                                    text="Forgot Password?",
-                                    command=self.forgot_password,
-                                    width=200,
-                                    fg_color="transparent",
-                                    text_color=("gray10", "gray90"))
-        forgot_button.pack(pady=10)
 
     def login(self):
         username = self.username_entry.get()
@@ -94,14 +87,151 @@ class LoginSystem:
             app.run()
         else:
             messagebox.showerror("Error", "Invalid username or password")
-    
-    def show_register(self):
-        # Registration GUI logic
-        pass
 
-    def forgot_password(self):
-        # Forgot password GUI logic
-        pass
+    def show_register(self):
+            # Create registration window
+            self.reg_window = ctk.CTkToplevel(self.window)
+            self.reg_window.title("Register New Account")
+            self.reg_window.geometry("400x500")
+            self.reg_window.resizable(False, False)
+            
+            # Registration frame
+            reg_frame = ctk.CTkFrame(self.reg_window)
+            reg_frame.pack(pady=20, padx=40, fill="both", expand=True)
+            
+            # Title
+            title_label = ctk.CTkLabel(reg_frame, 
+                                    text="Create New Account",
+                                    font=ctk.CTkFont(size=20, weight="bold"))
+            title_label.pack(pady=20)
+            
+            # Username
+            username_label = ctk.CTkLabel(reg_frame, text="Username:")
+            username_label.pack(pady=5)
+            self.reg_username = ctk.CTkEntry(reg_frame, width=200)
+            self.reg_username.pack()
+            
+            # Email
+            email_label = ctk.CTkLabel(reg_frame, text="Email:")
+            email_label.pack(pady=5)
+            self.reg_email = ctk.CTkEntry(reg_frame, width=200)
+            self.reg_email.pack()
+            
+            # Password
+            password_label = ctk.CTkLabel(reg_frame, text="Password:")
+            password_label.pack(pady=5)
+            self.reg_password = ctk.CTkEntry(reg_frame, width=200, show="●")
+            self.reg_password.pack()
+            
+            # Confirm Password
+            conf_password_label = ctk.CTkLabel(reg_frame, text="Confirm Password:")
+            conf_password_label.pack(pady=5)
+            self.reg_conf_password = ctk.CTkEntry(reg_frame, width=200, show="●")
+            self.reg_conf_password.pack()
+            
+            # Register Button
+            register_button = ctk.CTkButton(reg_frame,
+                                        text="Register",
+                                        command=self.register_user,
+                                        width=200)
+            register_button.pack(pady=20)
+
+    def show_register(self):
+        # Create registration window
+        self.reg_window = ctk.CTkToplevel(self.window)
+        self.reg_window.title("Register New Account")
+        self.reg_window.geometry("400x500")
+        self.reg_window.resizable(False, False)
+        
+        # Registration frame
+        reg_frame = ctk.CTkFrame(self.reg_window)
+        reg_frame.pack(pady=20, padx=40, fill="both", expand=True)
+        
+        # Title
+        title_label = ctk.CTkLabel(reg_frame, 
+                                 text="Create New Account",
+                                 font=ctk.CTkFont(size=20, weight="bold"))
+        title_label.pack(pady=20)
+        
+        # Username
+        username_label = ctk.CTkLabel(reg_frame, text="Username:")
+        username_label.pack(pady=5)
+        self.reg_username = ctk.CTkEntry(reg_frame, width=200)
+        self.reg_username.pack()
+        
+        # Email
+        email_label = ctk.CTkLabel(reg_frame, text="Email:")
+        email_label.pack(pady=5)
+        self.reg_email = ctk.CTkEntry(reg_frame, width=200)
+        self.reg_email.pack()
+        
+        # Password
+        password_label = ctk.CTkLabel(reg_frame, text="Password:")
+        password_label.pack(pady=5)
+        self.reg_password = ctk.CTkEntry(reg_frame, width=200, show="●")
+        self.reg_password.pack()
+        
+        # Confirm Password
+        conf_password_label = ctk.CTkLabel(reg_frame, text="Confirm Password:")
+        conf_password_label.pack(pady=5)
+        self.reg_conf_password = ctk.CTkEntry(reg_frame, width=200, show="●")
+        self.reg_conf_password.pack()
+        
+        # Register Button
+        register_button = ctk.CTkButton(reg_frame,
+                                      text="Register",
+                                      command=self.register_user,
+                                      width=200)
+        register_button.pack(pady=20)
+        
+    def register_user(self, db_name="Grocerify_Database.db"):
+        username = self.reg_username.get()
+        email = self.reg_email.get()
+        password = self.reg_password.get()
+        conf_password = self.reg_conf_password.get()
+        self.conn = sqlite3.connect(db_name)
+        self.cursor = self.conn.cursor()
+        
+        # Validation
+        if not all([username, email, password, conf_password]):
+            messagebox.showerror("Error", "Please fill in all fields")
+            return
+        
+        if password != conf_password:
+            messagebox.showerror("Error", "Passwords do not match")
+            return
+        
+        # Email validation
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            messagebox.showerror("Error", "Invalid email format")
+            return
+        
+        # Check if username exists
+        self.cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+        if self.cursor.fetchone():
+            messagebox.showerror("Error", "Username already exists")
+            return
+        
+        # Check if email exists
+        self.cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+        if self.cursor.fetchone():
+            messagebox.showerror("Error", "Email already registered")
+            return
+        
+        # Hash password and save user
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        try:
+            self.cursor.execute("""
+                INSERT INTO users (username, password, email, role)
+                VALUES (?, ?, ?, ?)
+            """, (username, hashed_password, email, 'user'))
+            self.conn.commit()
+            messagebox.showinfo("Success", "Account created successfully!")
+            self.reg_window.destroy()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to create account: {str(e)}")
+    
 
     def run(self):
         self.window.mainloop()
