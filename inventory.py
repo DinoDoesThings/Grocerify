@@ -73,6 +73,9 @@ class InventoryManager:
     def create_button_frame(self):
         button_frame = ctk.CTkFrame(self.main_container)
         button_frame.pack(fill="x", padx=20, pady=10)
+
+        #configure default color to green
+        ctk.set_default_color_theme("green")
         
         # Create buttons with consistent styling
         buttons = [
