@@ -1,6 +1,7 @@
 # inventory_module.py
 import customtkinter as ctk
 import random
+import logging
 from tkinter import messagebox, ttk, filedialog
 from database import Database
 from datetime import datetime
@@ -8,6 +9,13 @@ from login_system import LoginSystem
 import sqlite3
 import os
 import csv
+
+# Configure logging
+logging.basicConfig(
+    filename='log.txt',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 class InventoryManager:
     def __init__(self, username, role):
@@ -51,6 +59,7 @@ class InventoryManager:
     def logout(self):
         if messagebox.askyesno("Confirm Logout", "Are you sure you want to logout?"):
             # Close the current window
+            logging.info(f"Admin '{self.username}' logged out successfully.")
             self.window.destroy()
             # Relaunch the login system
             login_system = LoginSystem()
@@ -174,6 +183,7 @@ class InventoryManager:
             self.db.conn.commit()
             self.refreshTable()
             self.clearFields()
+            logging.info(f"Admin '{self.username}' saved new ID '{item_id}: '{name}, {price}, {quantity}, {category}'")
             messagebox.showinfo("Success", "Item saved successfully!")
         except sqlite3.IntegrityError:
             messagebox.showerror("Error", "Item ID already exists!")
@@ -201,6 +211,7 @@ class InventoryManager:
             self.db.conn.commit()
             self.refreshTable()
             self.clearFields()
+            logging.info(f"Admin '{self.username}' updated ID '{item_id} to '{name}, {price}, {quantity}, {category}'")
             messagebox.showinfo("Success", "Item updated successfully!")
         except ValueError:
             messagebox.showerror("Error", "Invalid price or quantity format!")
@@ -219,6 +230,7 @@ class InventoryManager:
             self.db.conn.commit()
             self.refreshTable()
             self.clearFields()
+            logging.info(f"Admin '{self.username}' deleted item with ID '{item_id}'")
             messagebox.showinfo("Success", "Item deleted successfully!")
 
     def selectData(self):
@@ -309,6 +321,7 @@ class InventoryManager:
             # Get file size for the success message
             file_size = os.path.getsize(file_path) / 1024  # Convert to KB
             
+            logging.info(f"User '{self.username}' exported inventory data to '{file_path}'")
             messagebox.showinfo(
                 "Export Successful",
                 f"Data exported successfully!\n\n"
@@ -322,11 +335,13 @@ class InventoryManager:
                 os.startfile(file_path)
                 
         except PermissionError:
+            logging.error(f"Permission error while user '{self.username}' tried to export data")
             messagebox.showerror(
                 "Export Error",
                 "Could not save the file. Please check if the file is open in another program."
             )
         except Exception as e:
+            logging.error(f"An error occurred while user '{self.username}' tried to export data: {str(e)}")
             messagebox.showerror(
                 "Export Error",
                 f"An error occurred while exporting: {str(e)}"
@@ -373,9 +388,13 @@ class InventoryManagerUser:
         self.create_button_frame()
         self.create_table_frame()
 
-    def logout(self):
+    def logout(self, username):
+
+        self.username = username
+
         if messagebox.askyesno("Confirm Logout", "Are you sure you want to logout?"):
             # Close the current window
+            logging.info(f"User '{username}' logged out successfully.")
             self.window.destroy()
             # Relaunch the login system
             login_system = LoginSystem()

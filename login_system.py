@@ -1,10 +1,18 @@
 # login_module.py
+import logging
 import customtkinter as ctk
 from tkinter import messagebox
 from database import Database
 import sqlite3
 import hashlib
 import re
+
+# Configure logging
+logging.basicConfig(
+    filename='log.txt',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 class LoginSystem:
     def __init__(self):
@@ -79,11 +87,13 @@ class LoginSystem:
         if user:
             # Successful login
             self.db.update_last_login(username)
+            logging.info(f"User '{username}' logged in successfully as '{user[1]}'")
             self.window.destroy()
             role = user[1]
 
             self.handle_user_role(username, role)
         else:
+            logging.warning(f"Failed login attempt for username '{username}'")
             messagebox.showerror("Error", "Invalid username or password")
 
     def handle_user_role(self, username, role):
