@@ -4,16 +4,18 @@ import random
 from tkinter import messagebox, ttk, filedialog
 from database import Database
 from datetime import datetime
+from login_system import LoginSystem
 import sqlite3
 import os
 import csv
 
 class InventoryManager:
     def __init__(self, username, role):
-        # Initialize the main window
+        # Initialize main window
         self.window = ctk.CTk()
         self.window.title(f"Grocerify - Welcome {username}")
         self.window.geometry("1000x800")
+        self.window.wm_iconbitmap("grocerify_logo.ico")
         
         self.username = username
         self.role = role
@@ -37,10 +39,22 @@ class InventoryManager:
                             font=ctk.CTkFont(size=24, weight="bold"))
         title.pack(pady=10)
         
+        #Logout Button
+        logout_button = ctk.CTkButton(self.main_container, text="Logout", command=self.logout, fg_color="red", width=120, height=32)
+        logout_button.pack(pady=10, anchor="ne", padx=20)
+
         # Create frames
         self.create_entry_frame()
         self.create_button_frame()
         self.create_table_frame()
+
+    def logout(self):
+        if messagebox.askyesno("Confirm Logout", "Are you sure you want to logout?"):
+            # Close the current window
+            self.window.destroy()
+            # Relaunch the login system
+            login_system = LoginSystem()
+            login_system.run()
 
     def create_entry_frame(self):
         entry_frame = ctk.CTkFrame(self.main_container)
@@ -63,7 +77,7 @@ class InventoryManager:
             entry.grid(row=i, column=1, padx=10, pady=5, sticky="w")
             self.entries.append(entry)
             
-            if i == 0:  # Add a "Generate ID" button next to the Item ID
+            if i == 0:  # Add Generate ID button next to Item ID
                 generate_btn = ctk.CTkButton(entry_frame, 
                                            text="Generate ID",
                                            command=self.generateId,
@@ -73,9 +87,6 @@ class InventoryManager:
     def create_button_frame(self):
         button_frame = ctk.CTkFrame(self.main_container)
         button_frame.pack(fill="x", padx=20, pady=10)
-
-        # Changes default color to green
-        ctk.set_default_color_theme("green")
         
         # Create buttons with consistent styling
         buttons = [
@@ -227,8 +238,6 @@ class InventoryManager:
     def generateId(self):
         self.placeholderArray[0].set(f"ITEM-{random.randint(1000, 9999)}")
 
-    # Export item data to Excel
-    
     def exportToExcel(self):
         try:
             # Get current timestamp for filename
@@ -243,7 +252,7 @@ class InventoryManager:
                 title="Export Inventory Data"
             )
             
-            if not file_path:  # Run if user cancels the dialog
+            if not file_path:  # If user cancels the dialog
                 return
             
             # Fetch all data from database with date_added
@@ -286,7 +295,7 @@ class InventoryManager:
                         date_obj = datetime.strptime(date_added, "%Y-%m-%d %H:%M:%S")
                         formatted_date = date_obj.strftime("%Y-%m-%d %I:%M:%S %p")
                     except ValueError:
-                        formatted_date = date_added  # Keep the original date if parsing fails
+                        formatted_date = date_added  # Keep original if parsing fails
                     
                     writer.writerow([
                         item_id,
@@ -308,7 +317,7 @@ class InventoryManager:
                 f"File size: {file_size:.1f} KB\n\n"
             )
             
-            # Ask if the user wants to open the exported file
+            # Ask if user wants to open the exported file
             if messagebox.askyesno("Open File", "Would you like to open the exported file?"):
                 os.startfile(file_path)
                 
@@ -322,7 +331,7 @@ class InventoryManager:
                 "Export Error",
                 f"An error occurred while exporting: {str(e)}"
             )
-
+    
     def run(self):
         self.window.mainloop()
 
@@ -332,6 +341,7 @@ class InventoryManagerUser:
         self.window = ctk.CTk()
         self.window.title(f"Grocerify - Welcome {username}")
         self.window.geometry("1000x800")
+        self.window.wm_iconbitmap("grocerify_logo.ico")
         
         self.username = username
         self.role = role
@@ -339,7 +349,9 @@ class InventoryManagerUser:
         # Database setup
         self.db = Database()
 
-        # Setup GUI
+        # Variables for entry fields
+        self.placeholderArray = [ctk.StringVar() for _ in range(5)]
+        
         self.setup_gui()
 
     def setup_gui(self):
@@ -353,14 +365,38 @@ class InventoryManagerUser:
                             font=ctk.CTkFont(size=24, weight="bold"))
         title.pack(pady=10)
         
-        # Create table frame
+        #Logout Button
+        logout_button = ctk.CTkButton(self.main_container, text="Logout", command=self.logout, fg_color="red", width=120, height=32)
+        logout_button.pack(pady=10, anchor="ne", padx=20)
+
+        # Create frames
+        self.create_button_frame()
         self.create_table_frame()
 
-        # Export Button
-        export_button = ctk.CTkButton(self.main_container, 
-                                      text="Export to Excel", 
-                                      command=self.exportToExcel)
-        export_button.pack(pady=10)
+    def logout(self):
+        if messagebox.askyesno("Confirm Logout", "Are you sure you want to logout?"):
+            # Close the current window
+            self.window.destroy()
+            # Relaunch the login system
+            login_system = LoginSystem()
+            login_system.run()
+
+    def create_button_frame(self):
+        button_frame = ctk.CTkFrame(self.main_container)
+        button_frame.pack(fill="x", padx=20, pady=10)
+        
+        # Create buttons with consistent styling
+        buttons = [
+            ("Export", self.exportToExcel)
+        ]
+        
+        for text, command in buttons:
+            btn = ctk.CTkButton(button_frame,
+                               text=text,
+                               command=command,
+                               width=120,
+                               height=32)
+            btn.pack(side="left", padx=5, pady=5)
 
     def create_table_frame(self):
         # Create a frame specifically for the table
@@ -379,9 +415,6 @@ class InventoryManagerUser:
         style = ttk.Style()
         style.configure("Treeview", rowheight=25)
         style.configure("Treeview.Heading", font=('Arial', 10, 'bold'))
-
-        #configure default color to green
-        ctk.set_default_color_theme("green")
         
         # Configure columns
         for col in self.tree["columns"]:

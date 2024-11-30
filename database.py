@@ -1,4 +1,3 @@
-# database_module.py
 import sqlite3
 import hashlib
 
@@ -65,6 +64,8 @@ class Database:
             WHERE username = ?
         """, (username,))
         self.conn.commit()
-
+    
     def close_connection(self):
         self.conn.close()
+
+    
