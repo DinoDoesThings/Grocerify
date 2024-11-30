@@ -185,26 +185,19 @@ class InventoryManager:
         if not selected_item:
             messagebox.showerror("Error", "Please select an item to update!")
             return
-        
-        # Retrieve the original item_id from the selected item
-        original_item_id = self.tree.item(selected_item[0])['values'][0]
 
-        new_item_id = self.placeholderArray[0].get()
+        item_id = self.tree.item(selected_item[0])['values'][0]
         name = self.placeholderArray[1].get()
         price = self.placeholderArray[2].get()
         quantity = self.placeholderArray[3].get()
         category = self.placeholderArray[4].get()
 
         try:
-            if str(new_item_id) != str(original_item_id):  # Compare as strings
-                messagebox.showerror("Error", "The item ID is not editable!")
-                return
-        
             self.db.cursor.execute("""
                 UPDATE inventory 
                 SET name=?, price=?, quantity=?, category=?
                 WHERE item_id=?
-            """, (name, float(price), int(quantity), category, original_item_id))
+            """, (name, float(price), int(quantity), category, item_id))
             self.db.conn.commit()
             self.refreshTable()
             self.clearFields()
