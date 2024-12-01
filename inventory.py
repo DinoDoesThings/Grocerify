@@ -388,13 +388,10 @@ class InventoryManagerUser:
         self.create_button_frame()
         self.create_table_frame()
 
-    def logout(self, username):
-
-        self.username = username
-
+    def logout(self):
         if messagebox.askyesno("Confirm Logout", "Are you sure you want to logout?"):
             # Close the current window
-            logging.info(f"User '{username}' logged out successfully.")
+            logging.info(f"User '{self.username}' logged out successfully.")
             self.window.destroy()
             # Relaunch the login system
             login_system = LoginSystem()
