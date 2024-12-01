@@ -4,3 +4,5 @@ BEFORE you run Grocerify make sure you:
 
 - pip install customtkinter
 
+- Grocerify is ready!
+
