@@ -352,7 +352,7 @@ class InventoryManager:
             )
     
     def run(self):
-        self.window.mainlooper()
+        self.window.mainloop()
 
 class InventoryManagerUser:
     def __init__(self, username, role):
