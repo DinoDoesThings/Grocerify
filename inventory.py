@@ -211,11 +211,11 @@ class InventoryManager:
                 UPDATE inventory 
                 SET name=?, price=?, quantity=?, category=?
                 WHERE item_id=?
-            """, (name, float(price), int(quantity), category, item_id))
+            """, (name, float(price), int(quantity), category, original_item_id))
             self.db.conn.commit()
             self.refreshTable()
             self.clearFields()
-            logging.info(f"Admin '{self.username}' updated ID '{item_id} to '{name}, {price}, {quantity}, {category}'")
+            logging.info(f"Admin '{self.username}' updated ID '{new_item_id} to '{name}, {price}, {quantity}, {category}'")
             messagebox.showinfo("Success", "Item updated successfully!")
         except ValueError:
             messagebox.showerror("Error", "Invalid price or quantity format!")
