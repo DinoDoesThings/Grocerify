@@ -205,7 +205,7 @@ class InventoryManager:
 
         try:
             if str(new_item_id) != str(original_item_id):
-                messagebox.showerror("Error", "You cannot edit the item ID!")
+                messagebox.showerror("Error", "You cannot edit the item ID.")
                 return
             self.db.cursor.execute("""
                 UPDATE inventory 

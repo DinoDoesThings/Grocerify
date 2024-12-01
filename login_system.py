@@ -20,6 +20,7 @@ class LoginSystem:
         self.window.title("Login System")
         self.window.geometry("400x440")
         self.window.resizable(False, False)
+        self.window.wm_iconbitmap("grocerify_logo.ico")
         
         # Configure appearance
         ctk.set_default_color_theme("green")
@@ -119,6 +120,7 @@ class LoginSystem:
             self.reg_window.title("Register New Account")
             self.reg_window.geometry("400x500")
             self.reg_window.resizable(False, False)
+            self.reg_window.wm_iconbitmap("grocerify_logo.ico")
             
             # Registration frame
             reg_frame = ctk.CTkFrame(self.reg_window)
