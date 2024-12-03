@@ -537,7 +537,8 @@ class InventoryManagerUser:
             
             # Get file size for the success message
             file_size = os.path.getsize(file_path) / 1024  # Convert to KB
-            
+            logging.info(f"User '{self.username}' exported inventory data to '{file_path}'")
+
             messagebox.showinfo(
                 "Export Successful",
                 f"Data exported successfully!\n\n"
@@ -551,11 +552,13 @@ class InventoryManagerUser:
                 os.startfile(file_path)
                 
         except PermissionError:
+            logging.error(f"Permission error while user '{self.username}' tried to export data")
             messagebox.showerror(
                 "Export Error",
                 "Could not save the file. Please check if the file is open in another program."
             )
         except Exception as e:
+            logging.error(f"An error occurred while user '{self.username}' tried to export data: {str(e)}")
             messagebox.showerror(
                 "Export Error",
                 f"An error occurred while exporting: {str(e)}"
