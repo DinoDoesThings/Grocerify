@@ -80,7 +80,7 @@ class LoginSystem:
         password = self.password_entry.get()
 
         if not username or not password:
-            messagebox.showerror("Error", "Please fill in all fields")
+            messagebox.showerror("Error", "Please fill in all fields.")
             return
 
         user = self.db.check_user_credentials(username, password)
@@ -95,7 +95,7 @@ class LoginSystem:
             self.handle_user_role(username, role)
         else:
             logging.warning(f"Failed login attempt for username '{username}'")
-            messagebox.showerror("Error", "Invalid username or password")
+            messagebox.showerror("Error", "Invalid username or password.")
 
     def handle_user_role(self, username, role):
         if role == "admin":
@@ -185,29 +185,29 @@ class LoginSystem:
         
         # Validation
         if not all([username, email, password, conf_password]):
-            messagebox.showerror("Error", "Please fill in all fields")
+            messagebox.showerror("Error", "Please fill in all fields.")
             return
         
         if password != conf_password:
-            messagebox.showerror("Error", "Passwords do not match")
+            messagebox.showerror("Error", "Passwords do not match.")
             return
         
         # Email validation
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_pattern, email):
-            messagebox.showerror("Error", "Invalid email format")
+            messagebox.showerror("Error", "Invalid email format.")
             return
         
         # Check if username exists
         self.cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         if self.cursor.fetchone():
-            messagebox.showerror("Error", "Username already exists")
+            messagebox.showerror("Error", "Username already exists.")
             return
         
         # Check if email exists
         self.cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
         if self.cursor.fetchone():
-            messagebox.showerror("Error", "Email already registered")
+            messagebox.showerror("Error", "Email already registered.")
             return
         
         # Hash password and save user

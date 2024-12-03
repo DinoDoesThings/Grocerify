@@ -32,6 +32,7 @@ class Database:
         """)
         self.conn.commit()
 
+    # Creates a default admin account if one does not exist
     def create_default_admin(self):
         self.cursor.execute("SELECT * FROM users WHERE username = 'admin'")
         if not self.cursor.fetchone():
